@@ -21,6 +21,7 @@
 
 html,body{
 margin:0;
+width:100%;
 height:100%;
 overflow:hidden;
 }
@@ -35,6 +36,7 @@ top:50%;
 width:100%;
 text-align:center;
 font-family:Arial;
+font-size:20px;
 }
 
 </style>
@@ -46,15 +48,15 @@ font-family:Arial;
 
 
 <div id="loading">
-Загрузка...
+Загрузка модели...
 </div>
-
 
 
 <script type="module">
 
 
 import * as THREE from "three";
+
 
 import {GLTFLoader}
 from
@@ -86,15 +88,8 @@ const camera =
 new THREE.PerspectiveCamera(
 45,
 window.innerWidth/window.innerHeight,
-0.1,
-10000
-);
-
-
-camera.position.set(
-0,
-0,
-5
+0.01,
+100000
 );
 
 
@@ -111,6 +106,11 @@ antialias:true
 renderer.setSize(
 window.innerWidth,
 window.innerHeight
+);
+
+
+renderer.setPixelRatio(
+window.devicePixelRatio
 );
 
 
@@ -132,22 +132,26 @@ new THREE.HemisphereLight(
 );
 
 
+const light =
+new THREE.DirectionalLight(
+0xffffff,
+4
+);
+
+
+light.position.set(
+100,
+200,
+100
+);
+
+
+scene.add(light);
 
 
 
-// ГРУППА ВРАЩЕНИЯ
 
-const objectGroup =
-new THREE.Group();
-
-
-scene.add(objectGroup);
-
-
-
-
-
-// КОНТРОЛЬ
+// КОНТРОЛЫ
 
 const controls =
 new OrbitControls(
@@ -156,14 +160,18 @@ renderer.domElement
 );
 
 
-controls.enableDamping=true;
+controls.enableDamping = true;
 
-controls.enablePan=false;
+controls.dampingFactor = 0.05;
 
-controls.autoRotate=true;
 
-controls.autoRotateSpeed=2;
+controls.enablePan = false;
 
+
+controls.autoRotate = false;
+
+
+controls.enableZoom = true;
 
 
 
@@ -187,34 +195,29 @@ const model =
 gltf.scene;
 
 
-
-objectGroup.add(model);
-
+scene.add(model);
 
 
 
-// ----------
-// Исправление ориентации CAD
-// ----------
 
-
-// попробуем вертикальную ориентацию
+// поворот CAD
 
 model.rotation.x =
-Math.PI/2;
+-Math.PI/2;
 
 
 
-
-// ----------
-// получаем реальные размеры
-// ----------
-
+// размеры
 
 const box =
 new THREE.Box3()
 .setFromObject(model);
 
+
+const center =
+box.getCenter(
+new THREE.Vector3()
+);
 
 
 const size =
@@ -224,28 +227,18 @@ new THREE.Vector3()
 
 
 
-const center =
-box.getCenter(
-new THREE.Vector3()
-);
+// центрируем
 
+model.position.x -= center.x;
 
+model.position.y -= center.y;
 
-console.log("SIZE",size);
-
-console.log("CENTER",center);
-
-
-
-
-// переносим модель относительно группы
-
-model.position.sub(center);
+model.position.z -= center.z;
 
 
 
 
-// масштабируем
+// масштаб под экран
 
 const maxSize =
 Math.max(
@@ -255,9 +248,8 @@ size.z
 );
 
 
-
 const scale =
-3/maxSize;
+5 / maxSize;
 
 
 model.scale.setScalar(scale);
@@ -265,14 +257,18 @@ model.scale.setScalar(scale);
 
 
 
-// после масштабирования
-// камера смотрит в центр
+
+// камера спереди
+
+const distance =
+maxSize * 1.5;
+
 
 
 camera.position.set(
 0,
 0,
-5
+distance
 );
 
 
@@ -291,6 +287,14 @@ controls.target.set(
 );
 
 
+controls.minDistance =
+distance * 0.3;
+
+
+controls.maxDistance =
+distance * 5;
+
+
 controls.update();
 
 
@@ -300,8 +304,14 @@ document
 .remove();
 
 
-},
 
+console.log(
+"Готово"
+);
+
+
+
+},
 
 
 undefined,
@@ -314,7 +324,6 @@ console.error(error);
 }
 
 );
-
 
 
 
@@ -345,6 +354,7 @@ animate();
 
 
 
+// RESIZE
 
 window.addEventListener(
 "resize",
@@ -363,7 +373,6 @@ window.innerHeight
 );
 
 });
-
 
 
 </script>
