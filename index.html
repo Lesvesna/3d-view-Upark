@@ -22,27 +22,27 @@
 <style>
 
 html,body{
-    margin:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
+margin:0;
+width:100%;
+height:100%;
+overflow:hidden;
 }
 
 body{
-    background:#ffffff;
+background:white;
 }
 
 canvas{
-    display:block;
+display:block;
 }
 
 #loading{
-    position:absolute;
-    top:50%;
-    width:100%;
-    text-align:center;
-    font-family:Arial;
-    font-size:20px;
+position:absolute;
+top:50%;
+width:100%;
+text-align:center;
+font-family:Arial;
+font-size:20px;
 }
 
 </style>
@@ -65,16 +65,14 @@ canvas{
 import * as THREE from "three";
 
 
-import { GLTFLoader }
+import {GLTFLoader}
 from
 "three/addons/loaders/GLTFLoader.js";
 
 
 
 
-// ======================
 // СЦЕНА
-// ======================
 
 const scene =
 new THREE.Scene();
@@ -86,25 +84,35 @@ new THREE.Color(0xffffff);
 
 
 
-// ======================
+// ОСИ ДЛЯ ПРОВЕРКИ
+
+scene.add(
+new THREE.AxesHelper(500)
+);
+
+
+scene.add(
+new THREE.GridHelper(500,50)
+);
+
+
+
+
 // КАМЕРА
-// ======================
 
 const camera =
 new THREE.PerspectiveCamera(
 45,
-window.innerWidth / window.innerHeight,
-0.01,
-10000
+window.innerWidth/window.innerHeight,
+0.1,
+100000
 );
 
 
-// строго спереди
-
 camera.position.set(
 0,
-0,
-150
+50,
+300
 );
 
 
@@ -117,24 +125,17 @@ camera.lookAt(
 
 
 
-// ======================
 // РЕНДЕР
-// ======================
 
 const renderer =
 new THREE.WebGLRenderer({
-    antialias:true
+antialias:true
 });
 
 
 renderer.setSize(
 window.innerWidth,
 window.innerHeight
-);
-
-
-renderer.setPixelRatio(
-window.devicePixelRatio
 );
 
 
@@ -145,29 +146,27 @@ renderer.domElement
 
 
 
-// ======================
 // СВЕТ
-// ======================
 
 scene.add(
 new THREE.HemisphereLight(
-    0xffffff,
-    0x555555,
-    5
+0xffffff,
+0x555555,
+5
 )
 );
 
 
 const light =
 new THREE.DirectionalLight(
-    0xffffff,
-    4
+0xffffff,
+5
 );
 
 
 light.position.set(
-50,
 100,
+200,
 100
 );
 
@@ -177,9 +176,7 @@ scene.add(light);
 
 
 
-// ======================
-// ГРУППА ДЛЯ ВРАЩЕНИЯ
-// ======================
+// ГРУППА
 
 const pivot =
 new THREE.Group();
@@ -190,9 +187,7 @@ scene.add(pivot);
 
 
 
-// ======================
-// ЗАГРУЗКА МОДЕЛИ
-// ======================
+// ЗАГРУЗКА
 
 const loader =
 new GLTFLoader();
@@ -219,13 +214,21 @@ pivot.add(model);
 
 
 
-console.log(
-"Модель загружена"
-);
+console.log("Модель загружена");
 
 
 
-// размеры
+
+// ПОВОРОТ CAD
+// попробуем вертикально
+
+model.rotation.x =
+-Math.PI/2;
+
+
+
+
+// центрируем
 
 const box =
 new THREE.Box3()
@@ -237,7 +240,6 @@ const center =
 box.getCenter(
 new THREE.Vector3()
 );
-
 
 
 const size =
@@ -253,7 +255,6 @@ size
 );
 
 
-
 console.log(
 "Центр:",
 center
@@ -261,14 +262,7 @@ center
 
 
 
-
-// переносим модель в центр
-
-model.position.x -= center.x;
-
-model.position.y -= center.y;
-
-model.position.z -= center.z;
+model.position.sub(center);
 
 
 
@@ -276,7 +270,7 @@ model.position.z -= center.z;
 
 // масштаб
 
-const maxSize =
+const max =
 Math.max(
 size.x,
 size.y,
@@ -285,14 +279,10 @@ size.z
 
 
 
-const scale =
-80 / maxSize;
-
-
-
 model.scale.setScalar(
-scale
+150/max
 );
+
 
 
 
@@ -301,8 +291,8 @@ scale
 
 camera.position.set(
 0,
-0,
-150
+50,
+250
 );
 
 
@@ -314,27 +304,20 @@ camera.lookAt(
 
 
 
-
 document
 .getElementById("loading")
 .remove();
 
 
-
 },
-
 
 
 undefined,
 
 
-
 (error)=>{
 
-console.error(
-"Ошибка:",
-error
-);
+console.error(error);
 
 }
 
@@ -343,25 +326,21 @@ error
 
 
 
-// ======================
+
 // АНИМАЦИЯ
-// ======================
 
 function animate(){
-
 
 requestAnimationFrame(
 animate
 );
 
 
-
 if(pivot){
 
-pivot.rotation.y += 0.01;
+pivot.rotation.y +=0.01;
 
 }
-
 
 
 renderer.render(
@@ -378,9 +357,6 @@ animate();
 
 
 
-// ======================
-// RESIZE
-// ======================
 
 window.addEventListener(
 "resize",
@@ -388,8 +364,7 @@ window.addEventListener(
 
 
 camera.aspect =
-window.innerWidth /
-window.innerHeight;
+window.innerWidth/window.innerHeight;
 
 
 camera.updateProjectionMatrix();
