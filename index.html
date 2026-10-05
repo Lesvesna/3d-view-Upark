@@ -4,16 +4,15 @@
 <head>
 
 <meta charset="UTF-8">
-
 <title>3D Viewer</title>
 
 
 <script type="importmap">
 {
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-  }
+ "imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+ }
 }
 </script>
 
@@ -22,7 +21,6 @@
 
 html,body{
 margin:0;
-width:100%;
 height:100%;
 overflow:hidden;
 }
@@ -41,7 +39,6 @@ font-family:Arial;
 
 </style>
 
-
 </head>
 
 
@@ -53,11 +50,11 @@ font-family:Arial;
 </div>
 
 
+
 <script type="module">
 
 
 import * as THREE from "three";
-
 
 import {GLTFLoader}
 from
@@ -71,6 +68,7 @@ from
 
 
 
+// СЦЕНА
 
 const scene =
 new THREE.Scene();
@@ -82,25 +80,27 @@ new THREE.Color(0xffffff);
 
 
 
+// КАМЕРА
 
 const camera =
 new THREE.PerspectiveCamera(
 45,
 window.innerWidth/window.innerHeight,
 0.1,
-100000
+10000
 );
 
 
 camera.position.set(
 0,
 0,
-200
+5
 );
 
 
 
 
+// РЕНДЕР
 
 const renderer =
 new THREE.WebGLRenderer({
@@ -121,35 +121,33 @@ renderer.domElement
 
 
 
+// СВЕТ
 
 scene.add(
 new THREE.HemisphereLight(
 0xffffff,
-0x444444,
+0x555555,
 5
 )
 );
 
 
-const light =
-new THREE.DirectionalLight(
-0xffffff,
-5
-);
 
 
-light.position.set(
-50,
-100,
-100
-);
+
+// ГРУППА ВРАЩЕНИЯ
+
+const objectGroup =
+new THREE.Group();
 
 
-scene.add(light);
+scene.add(objectGroup);
 
 
 
 
+
+// КОНТРОЛЬ
 
 const controls =
 new OrbitControls(
@@ -160,15 +158,17 @@ renderer.domElement
 
 controls.enableDamping=true;
 
+controls.enablePan=false;
+
 controls.autoRotate=true;
 
 controls.autoRotateSpeed=2;
 
-controls.enablePan=false;
 
 
 
 
+// ЗАГРУЗКА
 
 const loader =
 new GLTFLoader();
@@ -187,27 +187,33 @@ const model =
 gltf.scene;
 
 
-scene.add(model);
 
-
-
-console.log("MODEL OK");
+objectGroup.add(model);
 
 
 
 
-// размеры ДО поворота
+// ----------
+// Исправление ориентации CAD
+// ----------
+
+
+// попробуем вертикальную ориентацию
+
+model.rotation.x =
+Math.PI/2;
+
+
+
+
+// ----------
+// получаем реальные размеры
+// ----------
+
 
 const box =
 new THREE.Box3()
 .setFromObject(model);
-
-
-
-const center =
-box.getCenter(
-new THREE.Vector3()
-);
 
 
 
@@ -218,21 +224,30 @@ new THREE.Vector3()
 
 
 
-console.log(size);
+const center =
+box.getCenter(
+new THREE.Vector3()
+);
+
+
+
+console.log("SIZE",size);
+
+console.log("CENTER",center);
 
 
 
 
-// центр
+// переносим модель относительно группы
 
 model.position.sub(center);
 
 
 
 
-// масштаб
+// масштабируем
 
-const max =
+const maxSize =
 Math.max(
 size.x,
 size.y,
@@ -240,26 +255,24 @@ size.z
 );
 
 
-model.scale.setScalar(
-100/max
-);
+
+const scale =
+3/maxSize;
+
+
+model.scale.setScalar(scale);
 
 
 
 
-// теперь пробуем поворот
-
-model.rotation.y =
-Math.PI/2;
-
-
-
+// после масштабирования
+// камера смотрит в центр
 
 
 camera.position.set(
 0,
-20,
-250
+0,
+5
 );
 
 
@@ -268,6 +281,7 @@ camera.lookAt(
 0,
 0
 );
+
 
 
 controls.target.set(
@@ -293,7 +307,6 @@ document
 undefined,
 
 
-
 (error)=>{
 
 console.error(error);
@@ -306,6 +319,7 @@ console.error(error);
 
 
 
+// АНИМАЦИЯ
 
 function animate(){
 
@@ -321,6 +335,7 @@ renderer.render(
 scene,
 camera
 );
+
 
 }
 
@@ -338,6 +353,7 @@ window.addEventListener(
 camera.aspect =
 window.innerWidth/window.innerHeight;
 
+
 camera.updateProjectionMatrix();
 
 
@@ -351,7 +367,6 @@ window.innerHeight
 
 
 </script>
-
 
 </body>
 
