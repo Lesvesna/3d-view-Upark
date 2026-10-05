@@ -40,12 +40,15 @@ display:block;
 
 
 #loading{
+
 position:absolute;
 top:50%;
 width:100%;
 text-align:center;
+
 font-family:Arial;
 font-size:20px;
+
 }
 
 </style>
@@ -67,6 +70,7 @@ font-size:20px;
 
 import * as THREE from "three";
 
+
 import {GLTFLoader}
 from
 "three/addons/loaders/GLTFLoader.js";
@@ -78,7 +82,11 @@ from
 
 
 
+
+// =====================
 // СЦЕНА
+// =====================
+
 
 const scene =
 new THREE.Scene();
@@ -90,42 +98,68 @@ new THREE.Color(0xffffff);
 
 
 
+// =====================
 // КАМЕРА
+// =====================
+
 
 const camera =
 new THREE.PerspectiveCamera(
+
 45,
-window.innerWidth/window.innerHeight,
+
+window.innerWidth /
+window.innerHeight,
+
 0.01,
+
 100000
+
 );
 
+
+// ВИД СПЕРЕДИ
 
 camera.position.set(
+
 0,
-0,
-100
+
+20,
+
+150
+
 );
 
 
 
 
+
+// =====================
 // РЕНДЕР
+// =====================
+
 
 const renderer =
 new THREE.WebGLRenderer({
+
 antialias:true
+
 });
 
 
 renderer.setSize(
+
 window.innerWidth,
+
 window.innerHeight
+
 );
 
 
 renderer.setPixelRatio(
+
 window.devicePixelRatio
+
 );
 
 
@@ -136,28 +170,46 @@ renderer.domElement
 
 
 
+
+// =====================
 // СВЕТ
+// =====================
+
 
 scene.add(
+
 new THREE.HemisphereLight(
+
 0xffffff,
-0x444444,
+
+0x555555,
+
 5
+
 )
+
 );
+
 
 
 const light =
 new THREE.DirectionalLight(
+
 0xffffff,
-5
+
+4
+
 );
 
 
 light.position.set(
-10,
-10,
-10
+
+50,
+
+100,
+
+100
+
 );
 
 
@@ -166,30 +218,48 @@ scene.add(light);
 
 
 
+
+// =====================
 // УПРАВЛЕНИЕ
+// =====================
+
 
 const controls =
 new OrbitControls(
+
 camera,
+
 renderer.domElement
+
 );
 
 
-controls.enableDamping=true;
-
-controls.autoRotate=true;
-
-controls.autoRotateSpeed=2;
+controls.enableDamping = true;
 
 
-controls.minDistance=0.1;
-
-controls.maxDistance=10000;
+controls.dampingFactor = 0.05;
 
 
+controls.enableZoom = true;
 
 
-// ЗАГРУЗКА
+controls.minDistance = 20;
+
+
+controls.maxDistance = 500;
+
+
+// без автоматического вращения
+
+controls.autoRotate = false;
+
+
+
+
+
+// =====================
+// ЗАГРУЗКА МОДЕЛИ
+// =====================
 
 
 const loader =
@@ -202,6 +272,7 @@ loader.load(
 "models/grass.glb",
 
 
+
 (gltf)=>{
 
 
@@ -209,15 +280,16 @@ const model =
 gltf.scene;
 
 
+
 scene.add(model);
 
 
 
-console.log("Модель загружена");
 
+// ---------------------
+// центр модели
+// ---------------------
 
-
-// получаем размеры
 
 const box =
 new THREE.Box3()
@@ -231,7 +303,6 @@ new THREE.Vector3()
 );
 
 
-
 const size =
 box.getSize(
 new THREE.Vector3()
@@ -239,11 +310,12 @@ new THREE.Vector3()
 
 
 
-console.log(size);
+console.log(
+"Размер модели:",
+size
+);
 
 
-
-// центрируем
 
 model.position.x -= center.x;
 
@@ -254,39 +326,83 @@ model.position.z -= center.z;
 
 
 
-// ===== ГЛАВНОЕ ИЗМЕНЕНИЕ =====
 
-// увеличиваем объект
+// ---------------------
+// масштаб
+// ---------------------
+
+
+// подбираем большой размер
+
+
+const maxSize =
+Math.max(
+
+size.x,
+
+size.y,
+
+size.z
+
+);
+
+
+const scale =
+100 / maxSize;
+
+
 
 model.scale.set(
-0.05,
-0.05,
-0.05
+
+scale,
+
+scale,
+
+scale
+
 );
 
 
 
-// камера очень близко
+
+
+// ---------------------
+// камера спереди
+// ---------------------
+
 
 camera.position.set(
-80,
-80,
-80
+
+0,
+
+30,
+
+120
+
 );
+
 
 
 camera.lookAt(
+
 0,
+
 0,
+
 0
+
 );
 
 
 
 controls.target.set(
+
 0,
+
 0,
+
 0
+
 );
 
 
@@ -294,9 +410,17 @@ controls.update();
 
 
 
+
+
 document.getElementById(
 "loading"
 ).remove();
+
+
+console.log(
+"Модель загружена"
+);
+
 
 
 },
@@ -306,9 +430,20 @@ document.getElementById(
 undefined,
 
 
+
 (error)=>{
 
-console.error(error);
+
+console.error(
+error
+);
+
+
+document.getElementById(
+"loading"
+).innerHTML =
+"Ошибка загрузки модели";
+
 
 }
 
@@ -317,10 +452,15 @@ console.error(error);
 
 
 
+
+
+// =====================
 // АНИМАЦИЯ
+// =====================
 
 
 function animate(){
+
 
 requestAnimationFrame(
 animate
@@ -331,9 +471,13 @@ controls.update();
 
 
 renderer.render(
+
 scene,
+
 camera
+
 );
+
 
 }
 
@@ -343,15 +487,22 @@ animate();
 
 
 
-// RESIZE
+
+// =====================
+// РАЗМЕР ОКНА
+// =====================
 
 
 window.addEventListener(
+
 "resize",
+
 ()=>{
 
+
 camera.aspect =
-window.innerWidth/
+
+window.innerWidth /
 window.innerHeight;
 
 
@@ -359,11 +510,17 @@ camera.updateProjectionMatrix();
 
 
 renderer.setSize(
+
 window.innerWidth,
+
 window.innerHeight
+
 );
 
-});
+
+}
+
+);
 
 
 
