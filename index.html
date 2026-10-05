@@ -40,18 +40,16 @@ canvas {
 
 
 #loading {
-
     position:absolute;
     top:50%;
     width:100%;
     text-align:center;
-
     font-family:Arial;
     font-size:20px;
-
 }
 
 </style>
+
 
 </head>
 
@@ -83,9 +81,9 @@ from
 
 
 
-// ==========================
+// =======================
 // СЦЕНА
-// ==========================
+// =======================
 
 
 const scene =
@@ -98,10 +96,9 @@ new THREE.Color(0xffffff);
 
 
 
-
-// ==========================
+// =======================
 // КАМЕРА
-// ==========================
+// =======================
 
 
 const camera =
@@ -119,7 +116,7 @@ window.innerHeight,
 );
 
 
-// строго спереди
+// ФРОНТАЛЬНЫЙ ВИД
 
 camera.position.set(
 
@@ -127,17 +124,16 @@ camera.position.set(
 
 0,
 
-200
+150
 
 );
 
 
 
 
-
-// ==========================
+// =======================
 // РЕНДЕР
-// ==========================
+// =======================
 
 
 const renderer =
@@ -171,10 +167,9 @@ renderer.domElement
 
 
 
-
-// ==========================
+// =======================
 // СВЕТ
-// ==========================
+// =======================
 
 
 scene.add(
@@ -193,17 +188,17 @@ new THREE.HemisphereLight(
 
 
 
-const light =
+const directional =
 new THREE.DirectionalLight(
 
 0xffffff,
 
-5
+4
 
 );
 
 
-light.position.set(
+directional.position.set(
 
 50,
 
@@ -214,15 +209,14 @@ light.position.set(
 );
 
 
-scene.add(light);
+scene.add(directional);
 
 
 
 
-
-// ==========================
+// =======================
 // УПРАВЛЕНИЕ
-// ==========================
+// =======================
 
 
 const controls =
@@ -250,15 +244,22 @@ controls.minDistance = 20;
 controls.maxDistance = 500;
 
 
-controls.autoRotate = false;
+// АВТО ВРАЩЕНИЕ
+
+controls.autoRotate = true;
+
+controls.autoRotateSpeed = 2;
 
 
 
 
 
-// ==========================
-// ЗАГРУЗКА
-// ==========================
+// =======================
+// ЗАГРУЗКА МОДЕЛИ
+// =======================
+
+
+let model;
 
 
 const loader =
@@ -271,23 +272,26 @@ loader.load(
 "models/grass.glb",
 
 
+
 (gltf)=>{
 
 
-const model =
+model =
 gltf.scene;
-
 
 
 scene.add(model);
 
 
 
+console.log(
+"Модель загружена"
+);
 
 
-// ВАЖНО:
-// исправление ориентации CAD модели
 
+
+// исправление CAD ориентации
 
 model.rotation.x =
 -Math.PI / 2;
@@ -318,23 +322,8 @@ new THREE.Vector3()
 
 
 
-console.log(
-"Размер:",
-size
-);
-
-
-
-console.log(
-"Центр:",
-center
-);
-
-
-
 
 // центрируем
-
 
 model.position.x -= center.x;
 
@@ -347,7 +336,6 @@ model.position.z -= center.z;
 
 
 // масштаб
-
 
 const maxSize =
 Math.max(
@@ -380,9 +368,7 @@ scale
 
 
 
-
-// камера после масштаба
-
+// камера спереди
 
 camera.position.set(
 
@@ -432,12 +418,6 @@ document
 
 
 
-console.log(
-"Модель готова"
-);
-
-
-
 },
 
 
@@ -455,7 +435,7 @@ console.error(error);
 document
 .getElementById("loading")
 .innerHTML =
-"Ошибка загрузки";
+"Ошибка загрузки модели";
 
 
 }
@@ -465,11 +445,9 @@ document
 
 
 
-
-
-// ==========================
+// =======================
 // АНИМАЦИЯ
-// ==========================
+// =======================
 
 
 function animate(){
@@ -501,9 +479,9 @@ animate();
 
 
 
-// ==========================
-// RESIZE
-// ==========================
+// =======================
+// РАЗМЕР ОКНА
+// =======================
 
 
 window.addEventListener(
