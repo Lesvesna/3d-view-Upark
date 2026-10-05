@@ -28,11 +28,9 @@ height:100%;
 overflow:hidden;
 }
 
-
 body{
 background:white;
 }
-
 
 canvas{
 display:block;
@@ -60,6 +58,7 @@ font-family:Arial;
 </div>
 
 
+
 <script type="module">
 
 
@@ -73,7 +72,10 @@ from
 
 
 
+// =================
 // СЦЕНА
+// =================
+
 
 const scene =
 new THREE.Scene();
@@ -85,7 +87,10 @@ new THREE.Color(0xffffff);
 
 
 
+// =================
 // КАМЕРА
+// =================
+
 
 const camera =
 new THREE.PerspectiveCamera(
@@ -96,7 +101,194 @@ window.innerWidth/window.innerHeight,
 );
 
 
-// фиксированный фронтальный вид
+camera.position.set(
+0,
+0,
+200
+);
+
+
+camera.lookAt(
+0,
+0,
+0
+);
+
+
+
+
+// =================
+// РЕНДЕР
+// =================
+
+
+const renderer =
+new THREE.WebGLRenderer({
+antialias:true
+});
+
+
+renderer.setSize(
+window.innerWidth,
+window.innerHeight
+);
+
+
+document.body.appendChild(
+renderer.domElement
+);
+
+
+
+
+// =================
+// СВЕТ
+// =================
+
+
+scene.add(
+new THREE.HemisphereLight(
+0xffffff,
+0x555555,
+5
+)
+);
+
+
+
+const light =
+new THREE.DirectionalLight(
+0xffffff,
+4
+);
+
+
+light.position.set(
+50,
+100,
+100
+);
+
+
+scene.add(light);
+
+
+
+
+
+// =================
+// PIVOT ДЛЯ ВРАЩЕНИЯ
+// =================
+
+
+const pivot =
+new THREE.Group();
+
+
+scene.add(pivot);
+
+
+
+
+
+// =================
+// ЗАГРУЗКА
+// =================
+
+
+const loader =
+new THREE.GLTFLoader;
+
+
+
+loader.load(
+
+"models/grass.glb",
+
+
+(gltf)=>{
+
+
+const model =
+gltf.scene;
+
+
+
+// добавляем модель в pivot
+
+pivot.add(model);
+
+
+
+
+// =====================
+// ОРИЕНТАЦИЯ CAD
+// =====================
+
+
+// попробуй сначала так
+
+model.rotation.x =
+Math.PI / 2;
+
+
+
+// =====================
+// ЦЕНТРИРОВАНИЕ
+// =====================
+
+
+const box =
+new THREE.Box3()
+.setFromObject(model);
+
+
+
+const center =
+box.getCenter(
+new THREE.Vector3()
+);
+
+
+
+model.position.x -= center.x;
+
+model.position.y -= center.y;
+
+model.position.z -= center.z;
+
+
+
+
+
+const size =
+box.getSize(
+new THREE.Vector3()
+);
+
+
+
+const maxSize =
+Math.max(
+size.x,
+size.y,
+size.z
+);
+
+
+
+// размер
+
+const scale =
+80 / maxSize;
+
+
+model.scale.setScalar(scale);
+
+
+
+
+// камера
 
 camera.position.set(
 0,
@@ -113,157 +305,14 @@ camera.lookAt(
 
 
 
-
-// РЕНДЕР
-
-const renderer =
-new THREE.WebGLRenderer({
-antialias:true
-});
-
-
-renderer.setSize(
-window.innerWidth,
-window.innerHeight
-);
-
-
-renderer.setPixelRatio(
-window.devicePixelRatio
-);
-
-
-document.body.appendChild(
-renderer.domElement
-);
-
-
-
-
-// СВЕТ
-
-scene.add(
-new THREE.HemisphereLight(
-0xffffff,
-0x555555,
-5
-)
-);
-
-
-const light =
-new THREE.DirectionalLight(
-0xffffff,
-5
-);
-
-
-light.position.set(
-50,
-100,
-100
-);
-
-
-scene.add(light);
-
-
-
-
-// ЗАГРУЗКА
-
-
-let model;
-
-
-const loader =
-new GLTFLoader();
-
-
-
-loader.load(
-
-"models/grass.glb",
-
-
-(gltf)=>{
-
-
-model =
-gltf.scene;
-
-
-scene.add(model);
-
-
-
-console.log("Загружено");
-
-
-
-
-// ===== ИСПРАВЛЕНИЕ CAD =====
-
-
-// пробуем поставить вертикально
-
-model.rotation.x = Math.PI / 2;
-
-
-
-// если будет наоборот:
-// model.rotation.x = -Math.PI / 2;
-
-
-
-// центр
-
-const box =
-new THREE.Box3()
-.setFromObject(model);
-
-
-
-const center =
-box.getCenter(
-new THREE.Vector3()
-);
-
-
-
-const size =
-box.getSize(
-new THREE.Vector3()
-);
-
-
-
-model.position.sub(center);
-
-
-
-
-// масштаб
-
-const max =
-Math.max(
-size.x,
-size.y,
-size.z
-);
-
-
-model.scale.setScalar(
-80/max
-);
-
-
-
-
-
 document
 .getElementById("loading")
 .remove();
+
+
+console.log(
+"Готово"
+);
 
 
 },
@@ -283,10 +332,13 @@ console.error(error);
 
 
 
-// АНИМАЦИЯ
+// =================
+// ВРАЩЕНИЕ
+// =================
 
 
 function animate(){
+
 
 requestAnimationFrame(
 animate
@@ -294,13 +346,7 @@ animate
 
 
 
-if(model){
-
-// вращаем сам объект
-
-model.rotation.y += 0.01;
-
-}
+pivot.rotation.y += 0.01;
 
 
 
@@ -318,8 +364,7 @@ animate();
 
 
 
-// RESIZE
-
+// resize
 
 window.addEventListener(
 "resize",
@@ -340,6 +385,7 @@ window.innerHeight
 
 
 });
+
 
 
 </script>
