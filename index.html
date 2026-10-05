@@ -4,7 +4,6 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>3D Viewer</title>
 
@@ -22,27 +21,22 @@
 <style>
 
 html,body{
-    margin:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-}
-
-body{
-    background:#ffffff;
+margin:0;
+width:100%;
+height:100%;
+overflow:hidden;
 }
 
 canvas{
-    display:block;
+display:block;
 }
 
 #loading{
-    position:absolute;
-    top:50%;
-    width:100%;
-    text-align:center;
-    font-family:Arial;
-    font-size:20px;
+position:absolute;
+top:50%;
+width:100%;
+text-align:center;
+font-family:Arial;
 }
 
 </style>
@@ -55,9 +49,8 @@ canvas{
 
 
 <div id="loading">
-Загрузка модели...
+Загрузка...
 </div>
-
 
 
 <script type="module">
@@ -78,10 +71,6 @@ from
 
 
 
-// ======================
-// СЦЕНА
-// ======================
-
 
 const scene =
 new THREE.Scene();
@@ -93,72 +82,35 @@ new THREE.Color(0xffffff);
 
 
 
-// ======================
-// КАМЕРА
-// ======================
-
 
 const camera =
 new THREE.PerspectiveCamera(
-
 45,
-
-window.innerWidth /
-window.innerHeight,
-
+window.innerWidth/window.innerHeight,
 0.1,
-
 100000
-
 );
 
-
-// фронтальный вид
 
 camera.position.set(
-
-0,
-
-20,
-
-250
-
-);
-
-
-camera.lookAt(
 0,
 0,
-0
+200
 );
 
 
 
-
-// ======================
-// РЕНДЕР
-// ======================
 
 
 const renderer =
 new THREE.WebGLRenderer({
-
-    antialias:true
-
+antialias:true
 });
 
 
 renderer.setSize(
-
 window.innerWidth,
-
 window.innerHeight
-
-);
-
-
-renderer.setPixelRatio(
-window.devicePixelRatio
 );
 
 
@@ -169,45 +121,27 @@ renderer.domElement
 
 
 
-// ======================
-// СВЕТ
-// ======================
-
 
 scene.add(
-
 new THREE.HemisphereLight(
-
 0xffffff,
-
-0x555555,
-
+0x444444,
 5
-
 )
-
 );
-
 
 
 const light =
 new THREE.DirectionalLight(
-
 0xffffff,
-
-4
-
+5
 );
 
 
 light.position.set(
-
+50,
 100,
-
-200,
-
 100
-
 );
 
 
@@ -216,79 +150,24 @@ scene.add(light);
 
 
 
-// ======================
-// УПРАВЛЕНИЕ
-// ======================
-
 
 const controls =
 new OrbitControls(
-
 camera,
-
 renderer.domElement
-
 );
 
 
-controls.enableDamping = true;
+controls.enableDamping=true;
 
-controls.dampingFactor = 0.05;
+controls.autoRotate=true;
 
+controls.autoRotateSpeed=2;
 
-// запрещаем движение камеры
-
-controls.enablePan = false;
-
-
-// только вращение
-
-controls.enableZoom = true;
-
-
-controls.minDistance = 50;
-
-controls.maxDistance = 500;
+controls.enablePan=false;
 
 
 
-// фиксируем вертикальный угол
-
-controls.minPolarAngle = Math.PI / 2;
-
-controls.maxPolarAngle = Math.PI / 2;
-
-
-// авто вращение
-
-controls.autoRotate = true;
-
-controls.autoRotateSpeed = 2;
-
-
-
-
-// ======================
-// PIVOT
-// ======================
-
-
-const pivot =
-new THREE.Group();
-
-
-scene.add(pivot);
-
-
-
-let model;
-
-
-
-
-// ======================
-// ЗАГРУЗКА
-// ======================
 
 
 const loader =
@@ -304,35 +183,20 @@ loader.load(
 (gltf)=>{
 
 
-model =
+const model =
 gltf.scene;
 
 
-pivot.add(model);
+scene.add(model);
 
 
 
-console.log(
-"Модель загружена"
-);
-
-
-
-
-// ПОВОРОТ CAD
-// если объект боком - меняем здесь
-
-model.rotation.set(
-0,
-Math.PI / 2,
-0
-);
+console.log("MODEL OK");
 
 
 
 
-
-// размеры
+// размеры ДО поворота
 
 const box =
 new THREE.Box3()
@@ -354,64 +218,48 @@ new THREE.Vector3()
 
 
 
-console.log(
-"Размер:",
-size
-);
+console.log(size);
 
 
 
 
-// центрируем модель
+// центр
 
-model.position.x -= center.x;
-
-model.position.y -= center.y;
-
-model.position.z -= center.z;
-
+model.position.sub(center);
 
 
 
 
 // масштаб
 
-const maxSize =
+const max =
 Math.max(
-
 size.x,
-
 size.y,
-
 size.z
-
 );
-
-
-
-const scale =
-100 / maxSize;
-
 
 
 model.scale.setScalar(
-scale
+100/max
 );
 
 
 
 
+// теперь пробуем поворот
 
-// камера
+model.rotation.y =
+Math.PI/2;
+
+
+
+
 
 camera.position.set(
-
 0,
-
 20,
-
 250
-
 );
 
 
@@ -420,7 +268,6 @@ camera.lookAt(
 0,
 0
 );
-
 
 
 controls.target.set(
@@ -434,12 +281,9 @@ controls.update();
 
 
 
-
-
 document
 .getElementById("loading")
 .remove();
-
 
 
 },
@@ -452,10 +296,7 @@ undefined,
 
 (error)=>{
 
-console.error(
-"Ошибка:",
-error
-);
+console.error(error);
 
 }
 
@@ -464,18 +305,13 @@ error
 
 
 
-// ======================
-// АНИМАЦИЯ
-// ======================
 
 
 function animate(){
 
-
 requestAnimationFrame(
 animate
 );
-
 
 
 controls.update();
@@ -486,7 +322,6 @@ scene,
 camera
 );
 
-
 }
 
 
@@ -495,38 +330,24 @@ animate();
 
 
 
-// ======================
-// RESIZE
-// ======================
-
 
 window.addEventListener(
-
 "resize",
-
 ()=>{
 
-
 camera.aspect =
-
-window.innerWidth /
-window.innerHeight;
-
+window.innerWidth/window.innerHeight;
 
 camera.updateProjectionMatrix();
 
 
-
 renderer.setSize(
-
 window.innerWidth,
-
 window.innerHeight
-
 );
 
-
 });
+
 
 
 </script>
