@@ -30,7 +30,7 @@ overflow:hidden;
 
 
 body{
-background:#ffffff;
+background:white;
 }
 
 
@@ -45,11 +45,9 @@ top:50%;
 width:100%;
 text-align:center;
 font-family:Arial;
-font-size:20px;
 }
 
 </style>
-
 
 </head>
 
@@ -62,7 +60,6 @@ font-size:20px;
 </div>
 
 
-
 <script type="module">
 
 
@@ -72,11 +69,6 @@ import * as THREE from "three";
 import {GLTFLoader}
 from
 "three/addons/loaders/GLTFLoader.js";
-
-
-import {OrbitControls}
-from
-"three/addons/controls/OrbitControls.js";
 
 
 
@@ -99,17 +91,24 @@ const camera =
 new THREE.PerspectiveCamera(
 45,
 window.innerWidth/window.innerHeight,
-0.01,
-100000
+0.1,
+10000
 );
 
 
-// строго спереди
+// фиксированный фронтальный вид
 
 camera.position.set(
 0,
 0,
 150
+);
+
+
+camera.lookAt(
+0,
+0,
+0
 );
 
 
@@ -171,37 +170,10 @@ scene.add(light);
 
 
 
-// КОНТРОЛЫ
+// ЗАГРУЗКА
 
-const controls =
-new OrbitControls(
-camera,
-renderer.domElement
-);
-
-
-controls.enableDamping=true;
-
-
-controls.autoRotate=false; // важно!
-
-
-// разрешаем ручное вращение
-
-controls.enableZoom=true;
-
-
-controls.minDistance=20;
-
-controls.maxDistance=500;
-
-
-
-
-// МОДЕЛЬ
 
 let model;
-
 
 
 const loader =
@@ -225,18 +197,26 @@ scene.add(model);
 
 
 
-console.log("Модель загружена");
+console.log("Загружено");
 
 
 
 
-// НЕ ПОВОРАЧИВАЕМ ПОКА CAD МОДЕЛЬ
-
-// model.rotation.x = -Math.PI/2;
+// ===== ИСПРАВЛЕНИЕ CAD =====
 
 
+// пробуем поставить вертикально
 
-// размеры
+model.rotation.x = Math.PI / 2;
+
+
+
+// если будет наоборот:
+// model.rotation.x = -Math.PI / 2;
+
+
+
+// центр
 
 const box =
 new THREE.Box3()
@@ -258,9 +238,6 @@ new THREE.Vector3()
 
 
 
-
-// центр
-
 model.position.sub(center);
 
 
@@ -268,7 +245,7 @@ model.position.sub(center);
 
 // масштаб
 
-const maxSize =
+const max =
 Math.max(
 size.x,
 size.y,
@@ -276,40 +253,10 @@ size.z
 );
 
 
-const scale =
-80 / maxSize;
-
-
-model.scale.setScalar(scale);
-
-
-
-
-// камера спереди
-
-camera.position.set(
-0,
-0,
-150
+model.scale.setScalar(
+80/max
 );
 
-
-camera.lookAt(
-0,
-0,
-0
-);
-
-
-
-controls.target.set(
-0,
-0,
-0
-);
-
-
-controls.update();
 
 
 
@@ -319,13 +266,10 @@ document
 .remove();
 
 
-
 },
 
 
-
 undefined,
-
 
 
 (error)=>{
@@ -339,27 +283,25 @@ console.error(error);
 
 
 
-
 // АНИМАЦИЯ
 
-function animate(){
 
+function animate(){
 
 requestAnimationFrame(
 animate
 );
 
 
-// вращаем объект, а не камеру
 
 if(model){
+
+// вращаем сам объект
 
 model.rotation.y += 0.01;
 
 }
 
-
-controls.update();
 
 
 renderer.render(
@@ -376,8 +318,8 @@ animate();
 
 
 
-
 // RESIZE
+
 
 window.addEventListener(
 "resize",
