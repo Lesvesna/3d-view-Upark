@@ -193,7 +193,7 @@ scene.add(light);
 
 
 // =====================
-// УПРАВЛЕНИЕ КАМЕРОЙ
+// КАМЕРА УПРАВЛЕНИЕ
 // =====================
 
 
@@ -208,6 +208,7 @@ renderer.domElement
 
 
 controls.enableDamping = true;
+
 
 controls.dampingFactor = 0.05;
 
@@ -225,8 +226,10 @@ controls.maxDistance = 500;
 
 
 
+
+
 // =====================
-// ЗАГРУЗКА
+// ЗАГРУЗКА МОДЕЛИ
 // =====================
 
 
@@ -259,7 +262,7 @@ console.log(
 
 
 
-// Поворот CAD модели
+// поворот CAD модели
 
 model.rotation.x =
 -Math.PI / 2;
@@ -268,7 +271,7 @@ model.rotation.x =
 
 
 
-// Размеры
+// размеры модели
 
 const box =
 new THREE.Box3()
@@ -298,7 +301,8 @@ size
 
 
 
-// центрируем объект
+
+// центрирование
 
 model.position.x -= center.x;
 
@@ -311,7 +315,7 @@ model.position.z -= center.z;
 
 
 // =====================
-// БОЛЬШОЙ МАСШТАБ
+// УВЕЛИЧЕННЫЙ МАСШТАБ
 // =====================
 
 
@@ -329,7 +333,7 @@ size.z
 
 
 const scale =
-80 / maxSize;
+500 / maxSize;
 
 
 
@@ -352,7 +356,7 @@ camera.position.set(
 
 0,
 
-80
+150
 
 );
 
@@ -382,10 +386,10 @@ controls.target.set(
 
 
 
-controls.minDistance = 20;
+controls.minDistance = 30;
 
-controls.maxDistance = 200;
 
+controls.maxDistance = 600;
 
 
 controls.update();
@@ -412,8 +416,15 @@ undefined,
 
 
 console.error(
+"Ошибка загрузки:",
 error
 );
+
+
+document
+.getElementById("loading")
+.innerHTML =
+"Ошибка загрузки модели";
 
 
 }
@@ -477,6 +488,7 @@ window.innerHeight;
 
 
 camera.updateProjectionMatrix();
+
 
 
 renderer.setSize(
