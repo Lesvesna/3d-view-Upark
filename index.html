@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 
 <head>
 
@@ -13,6 +13,7 @@
 
 html, body {
     margin: 0;
+    padding: 0;
     width: 100%;
     height: 100%;
     overflow: hidden;
@@ -20,7 +21,7 @@ html, body {
 
 
 body {
-    background: #ffffff;
+    background: #eeeeee;
 }
 
 
@@ -28,14 +29,15 @@ canvas {
     display: block;
 }
 
-#error {
+
+#message {
     position: absolute;
     top: 50%;
     width: 100%;
     text-align: center;
-    font-family: Arial;
-    color: red;
+    font-family: Arial, sans-serif;
     font-size: 20px;
+    color: #333;
 }
 
 </style>
@@ -45,7 +47,8 @@ canvas {
 
 <body>
 
-<div id="error"></div>
+
+<div id="message"></div>
 
 
 <script type="module">
@@ -66,15 +69,20 @@ from
 
 
 
-// Сцена
+// ---------------------
+// СЦЕНА
+// ---------------------
 
 const scene = new THREE.Scene();
 
-scene.background = new THREE.Color(0xffffff);
+scene.background =
+new THREE.Color(0xffffff);
 
 
 
-// Камера
+// ---------------------
+// КАМЕРА
+// ---------------------
 
 const camera =
 new THREE.PerspectiveCamera(
@@ -84,11 +92,18 @@ window.innerWidth / window.innerHeight,
 1000
 );
 
-camera.position.set(0, 1, 3);
+
+camera.position.set(
+0,
+1,
+3
+);
 
 
 
-// Рендер
+// ---------------------
+// РЕНДЕР
+// ---------------------
 
 const renderer =
 new THREE.WebGLRenderer({
@@ -113,7 +128,9 @@ renderer.domElement
 
 
 
-// Свет
+// ---------------------
+// СВЕТ
+// ---------------------
 
 const light =
 new THREE.HemisphereLight(
@@ -125,24 +142,27 @@ new THREE.HemisphereLight(
 scene.add(light);
 
 
-
-const directional =
+const directionalLight =
 new THREE.DirectionalLight(
 0xffffff,
 2
 );
 
-directional.position.set(
+
+directionalLight.position.set(
 5,
 5,
 5
 );
 
-scene.add(directional);
+
+scene.add(directionalLight);
 
 
 
-// Управление
+// ---------------------
+// УПРАВЛЕНИЕ
+// ---------------------
 
 const controls =
 new OrbitControls(
@@ -157,15 +177,14 @@ controls.dampingFactor = 0.05;
 
 
 controls.autoRotate = true;
+
 controls.autoRotateSpeed = 2;
 
 
 
-// Получаем название модели из ссылки
-//
-// пример:
-// ?model=chair.glb
-
+// ---------------------
+// ПОЛУЧАЕМ МОДЕЛЬ ИЗ ССЫЛКИ
+// ---------------------
 
 const params =
 new URLSearchParams(
@@ -180,15 +199,16 @@ params.get("model");
 
 if (!model) {
 
-document.getElementById("error").innerHTML =
-"❌ Модель не указана";
+document.getElementById("message").innerHTML =
+"❌ Модель не указана<br><br>Добавьте ?model=название.glb";
 
 }
 
 
 
-// Загружаем модель
-
+// ---------------------
+// ЗАГРУЗКА GLB
+// ---------------------
 
 const loader =
 new GLTFLoader();
@@ -197,29 +217,34 @@ new GLTFLoader();
 
 if(model){
 
+
 loader.load(
 
 "models/" + model,
 
 
-(gltf)=>{
+function(gltf){
 
 
 const object =
 gltf.scene;
 
 
-
 scene.add(object);
 
 
 
-// Автоматическое масштабирование
+// центрируем модель
 
 const box =
 new THREE.Box3()
 .setFromObject(object);
 
+
+const center =
+box.getCenter(
+new THREE.Vector3()
+);
 
 
 const size =
@@ -229,18 +254,15 @@ new THREE.Vector3()
 
 
 
-const center =
-box.getCenter(
-new THREE.Vector3()
-);
-
-
-
 object.position.x -= center.x;
+
 object.position.y -= center.y;
+
 object.position.z -= center.z;
 
 
+
+// масштабирование
 
 const maxSize =
 Math.max(
@@ -248,7 +270,6 @@ size.x,
 size.y,
 size.z
 );
-
 
 
 const scale =
@@ -263,9 +284,12 @@ scale
 
 
 
-// камера под объект
+camera.position.set(
+0,
+0,
+3
+);
 
-camera.position.z = 3;
 
 
 controls.target.set(
@@ -279,15 +303,30 @@ controls.update();
 
 
 
+document.getElementById("message").innerHTML = "";
+
+
 },
 
 
 
-(error)=>{
+function(xhr){
 
-console.log(error);
+console.log(
+"Загрузка:",
+(xhr.loaded / xhr.total * 100) + "%"
+);
 
-document.getElementById("error").innerHTML =
+},
+
+
+
+function(error){
+
+console.error(error);
+
+
+document.getElementById("message").innerHTML =
 "❌ Ошибка загрузки модели";
 
 }
@@ -295,11 +334,14 @@ document.getElementById("error").innerHTML =
 
 );
 
+
 }
 
 
 
-// Анимация
+// ---------------------
+// АНИМАЦИЯ
+// ---------------------
 
 function animate(){
 
@@ -325,7 +367,9 @@ animate();
 
 
 
-// Под размер экрана
+// ---------------------
+// АДАПТАЦИЯ ЭКРАНА
+// ---------------------
 
 window.addEventListener(
 "resize",
