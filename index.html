@@ -56,6 +56,567 @@ canvas {
     font-family:Arial;
     font-size:20px;
 
+    color:#333;
+
+}
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+<div id="loading">
+Загрузка 3D модели...
+</div>
+
+
+
+<script type="module">
+
+
+import * as THREE from "three";
+
+
+import { GLTFLoader }
+from
+"three/addons/loaders/GLTFLoader.js";
+
+
+import { OrbitControls }
+from
+"three/addons/controls/OrbitControls.js";
+
+
+
+
+// =====================
+// СЦЕНА
+// =====================
+
+
+const scene =
+new THREE.Scene();
+
+
+scene.background =
+new THREE.Color(0xffffff);
+
+
+
+
+// =====================
+// КАМЕРА
+// =====================
+
+
+const camera =
+new THREE.PerspectiveCamera(
+
+45,
+
+window.innerWidth /
+window.innerHeight,
+
+0.1,
+
+10000
+
+);
+
+
+camera.position.set(
+5,
+5,
+5
+);
+
+
+
+
+// =====================
+// РЕНДЕР
+// =====================
+
+
+const renderer =
+new THREE.WebGLRenderer({
+
+    antialias:true
+
+});
+
+
+renderer.setSize(
+
+window.innerWidth,
+
+window.innerHeight
+
+);
+
+
+renderer.setPixelRatio(
+
+window.devicePixelRatio
+
+);
+
+
+document.body.appendChild(
+
+renderer.domElement
+
+);
+
+
+
+
+// =====================
+// СВЕТ
+// =====================
+
+
+scene.add(
+
+new THREE.HemisphereLight(
+
+0xffffff,
+
+0x444444,
+
+3
+
+)
+
+);
+
+
+
+const light =
+new THREE.DirectionalLight(
+
+0xffffff,
+
+2
+
+);
+
+
+light.position.set(
+
+5,
+
+10,
+
+5
+
+);
+
+
+scene.add(light);
+
+
+
+
+// =====================
+// УПРАВЛЕНИЕ
+// =====================
+
+
+const controls =
+new OrbitControls(
+
+camera,
+
+renderer.domElement
+
+);
+
+
+controls.enableDamping = true;
+
+controls.dampingFactor = 0.05;
+
+
+controls.autoRotate = true;
+
+controls.autoRotateSpeed = 2;
+
+
+
+
+// =====================
+// ЗАГРУЗКА МОДЕЛИ
+// =====================
+
+
+const loader =
+new GLTFLoader();
+
+
+
+loader.load(
+
+"models/grass.glb",
+
+
+
+(gltf)=>{
+
+
+const model =
+gltf.scene;
+
+
+scene.add(model);
+
+
+
+console.log(
+"Модель загружена"
+);
+
+
+
+
+// ---------------------
+// Размеры модели
+// ---------------------
+
+
+const box =
+new THREE.Box3()
+.setFromObject(model);
+
+
+
+const size =
+box.getSize(
+
+new THREE.Vector3()
+
+);
+
+
+
+const center =
+box.getCenter(
+
+new THREE.Vector3()
+
+);
+
+
+
+console.log(
+"Размер:",
+size
+);
+
+
+console.log(
+"Центр:",
+center
+);
+
+
+
+
+// ---------------------
+// Центрирование
+// ---------------------
+
+
+model.position.x -= center.x;
+
+model.position.y -= center.y;
+
+model.position.z -= center.z;
+
+
+
+
+
+// ---------------------
+// Масштабирование
+// ---------------------
+
+
+const maxSize =
+Math.max(
+
+size.x,
+
+size.y,
+
+size.z
+
+);
+
+
+
+const scale =
+5 / maxSize;
+
+
+
+model.scale.set(
+
+scale,
+
+scale,
+
+scale
+
+);
+
+
+
+
+// ---------------------
+// Камера
+// ---------------------
+
+
+const distance =
+maxSize * 2;
+
+
+
+camera.position.set(
+
+distance,
+
+distance,
+
+distance
+
+);
+
+
+
+camera.lookAt(
+
+0,
+
+0,
+
+0
+
+);
+
+
+
+controls.target.set(
+
+0,
+
+0,
+
+0
+
+);
+
+
+
+controls.update();
+
+
+
+
+document.getElementById(
+"loading"
+).style.display="none";
+
+
+
+},
+
+
+
+(xhr)=>{
+
+
+console.log(
+
+"Загрузка:",
+
+(xhr.loaded / xhr.total * 100)
+
+);
+
+},
+
+
+
+(error)=>{
+
+
+console.error(
+
+"Ошибка загрузки модели:",
+
+error
+
+);
+
+
+document.getElementById(
+"loading"
+).innerHTML =
+"Ошибка загрузки модели";
+
+
+}
+
+);
+
+
+
+
+
+// =====================
+// АНИМАЦИЯ
+// =====================
+
+
+function animate(){
+
+
+requestAnimationFrame(
+
+animate
+
+);
+
+
+controls.update();
+
+
+renderer.render(
+
+scene,
+
+camera
+
+);
+
+
+}
+
+
+
+animate();
+
+
+
+
+
+// =====================
+// АДАПТАЦИЯ ЭКРАНА
+// =====================
+
+
+window.addEventListener(
+
+"resize",
+
+()=>{
+
+
+camera.aspect =
+
+window.innerWidth /
+
+window.innerHeight;
+
+
+camera.updateProjectionMatrix();
+
+
+
+renderer.setSize(
+
+window.innerWidth,
+
+window.innerHeight
+
+);
+
+
+}
+
+);
+
+
+
+</script>
+
+
+</body>
+
+</html><!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>3D Viewer</title>
+
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+
+<style>
+
+html, body {
+
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+
+}
+
+
+body {
+
+    background:#ffffff;
+
+}
+
+
+canvas {
+
+    display:block;
+
+}
+
+
+#loading {
+
+    position:absolute;
+    top:50%;
+    width:100%;
+    text-align:center;
+
+    font-family:Arial;
+    font-size:20px;
+
 }
 
 </style>
