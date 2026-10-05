@@ -41,6 +41,7 @@ font-size:20px;
 
 </style>
 
+
 </head>
 
 
@@ -50,6 +51,7 @@ font-size:20px;
 <div id="loading">
 Загрузка модели...
 </div>
+
 
 
 <script type="module">
@@ -70,7 +72,10 @@ from
 
 
 
+// =====================
 // СЦЕНА
+// =====================
+
 
 const scene =
 new THREE.Scene();
@@ -82,35 +87,54 @@ new THREE.Color(0xffffff);
 
 
 
+// =====================
 // КАМЕРА
+// =====================
+
 
 const camera =
 new THREE.PerspectiveCamera(
+
 45,
-window.innerWidth/window.innerHeight,
+
+window.innerWidth /
+window.innerHeight,
+
 0.01,
+
 100000
+
 );
 
 
 
 
+// =====================
 // РЕНДЕР
+// =====================
+
 
 const renderer =
 new THREE.WebGLRenderer({
+
 antialias:true
+
 });
 
 
 renderer.setSize(
+
 window.innerWidth,
+
 window.innerHeight
+
 );
 
 
 renderer.setPixelRatio(
+
 window.devicePixelRatio
+
 );
 
 
@@ -121,28 +145,45 @@ renderer.domElement
 
 
 
+// =====================
 // СВЕТ
+// =====================
+
 
 scene.add(
+
 new THREE.HemisphereLight(
+
 0xffffff,
-0x555555,
+
+0x444444,
+
 5
+
 )
+
 );
+
 
 
 const light =
 new THREE.DirectionalLight(
+
 0xffffff,
-4
+
+5
+
 );
 
 
 light.position.set(
+
 100,
+
 200,
+
 100
+
 );
 
 
@@ -151,12 +192,18 @@ scene.add(light);
 
 
 
-// КОНТРОЛЫ
+// =====================
+// УПРАВЛЕНИЕ КАМЕРОЙ
+// =====================
+
 
 const controls =
 new OrbitControls(
+
 camera,
+
 renderer.domElement
+
 );
 
 
@@ -168,15 +215,20 @@ controls.dampingFactor = 0.05;
 controls.enablePan = false;
 
 
-controls.autoRotate = false;
-
-
 controls.enableZoom = true;
 
 
+controls.minDistance = 10;
 
 
+controls.maxDistance = 500;
+
+
+
+// =====================
 // ЗАГРУЗКА
+// =====================
+
 
 const loader =
 new GLTFLoader();
@@ -186,6 +238,7 @@ new GLTFLoader();
 loader.load(
 
 "models/grass.glb",
+
 
 
 (gltf)=>{
@@ -199,25 +252,35 @@ scene.add(model);
 
 
 
+console.log(
+"Модель загружена"
+);
 
-// поворот CAD
+
+
+
+// Поворот CAD модели
 
 model.rotation.x =
--Math.PI/2;
+-Math.PI / 2;
 
 
 
-// размеры
+
+
+// Размеры
 
 const box =
 new THREE.Box3()
 .setFromObject(model);
 
 
+
 const center =
 box.getCenter(
 new THREE.Vector3()
 );
+
 
 
 const size =
@@ -227,7 +290,15 @@ new THREE.Vector3()
 
 
 
-// центрируем
+console.log(
+"Размер:",
+size
+);
+
+
+
+
+// центрируем объект
 
 model.position.x -= center.x;
 
@@ -238,64 +309,88 @@ model.position.z -= center.z;
 
 
 
-// масштаб под экран
+
+// =====================
+// БОЛЬШОЙ МАСШТАБ
+// =====================
+
 
 const maxSize =
 Math.max(
+
 size.x,
+
 size.y,
+
 size.z
+
 );
+
 
 
 const scale =
-5 / maxSize;
-
-
-model.scale.setScalar(scale);
+80 / maxSize;
 
 
 
-
-
-// камера спереди
-
-const distance =
-maxSize * 1.5;
-
-
-
-camera.position.set(
-0,
-0,
-distance
+model.scale.setScalar(
+scale
 );
 
 
+
+
+
+// =====================
+// КАМЕРА СПЕРЕДИ
+// =====================
+
+
+camera.position.set(
+
+0,
+
+0,
+
+80
+
+);
+
+
+
 camera.lookAt(
+
 0,
+
 0,
+
 0
+
 );
 
 
 
 controls.target.set(
+
 0,
+
 0,
+
 0
+
 );
 
 
-controls.minDistance =
-distance * 0.3;
 
+controls.minDistance = 20;
 
-controls.maxDistance =
-distance * 5;
+controls.maxDistance = 200;
+
 
 
 controls.update();
+
+
 
 
 
@@ -305,21 +400,21 @@ document
 
 
 
-console.log(
-"Готово"
-);
-
-
-
 },
+
 
 
 undefined,
 
 
+
 (error)=>{
 
-console.error(error);
+
+console.error(
+error
+);
+
 
 }
 
@@ -328,9 +423,14 @@ console.error(error);
 
 
 
+
+// =====================
 // АНИМАЦИЯ
+// =====================
+
 
 function animate(){
+
 
 requestAnimationFrame(
 animate
@@ -341,8 +441,11 @@ controls.update();
 
 
 renderer.render(
+
 scene,
+
 camera
+
 );
 
 
@@ -354,28 +457,42 @@ animate();
 
 
 
+
+// =====================
 // RESIZE
+// =====================
+
 
 window.addEventListener(
+
 "resize",
+
 ()=>{
 
+
 camera.aspect =
-window.innerWidth/window.innerHeight;
+
+window.innerWidth /
+window.innerHeight;
 
 
 camera.updateProjectionMatrix();
 
 
 renderer.setSize(
+
 window.innerWidth,
+
 window.innerHeight
+
 );
+
 
 });
 
 
 </script>
+
 
 </body>
 
