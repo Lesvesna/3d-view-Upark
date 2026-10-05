@@ -22,27 +22,27 @@
 <style>
 
 html,body{
-margin:0;
-width:100%;
-height:100%;
-overflow:hidden;
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
 }
 
 body{
-background:white;
+    background:#ffffff;
 }
 
 canvas{
-display:block;
+    display:block;
 }
 
-
 #loading{
-position:absolute;
-top:50%;
-width:100%;
-text-align:center;
-font-family:Arial;
+    position:absolute;
+    top:50%;
+    width:100%;
+    text-align:center;
+    font-family:Arial;
+    font-size:20px;
 }
 
 </style>
@@ -65,17 +65,16 @@ font-family:Arial;
 import * as THREE from "three";
 
 
-import {GLTFLoader}
+import { GLTFLoader }
 from
 "three/addons/loaders/GLTFLoader.js";
 
 
 
 
-// =================
+// ======================
 // СЦЕНА
-// =================
-
+// ======================
 
 const scene =
 new THREE.Scene();
@@ -87,24 +86,25 @@ new THREE.Color(0xffffff);
 
 
 
-// =================
+// ======================
 // КАМЕРА
-// =================
-
+// ======================
 
 const camera =
 new THREE.PerspectiveCamera(
 45,
-window.innerWidth/window.innerHeight,
-0.1,
+window.innerWidth / window.innerHeight,
+0.01,
 10000
 );
 
 
+// строго спереди
+
 camera.position.set(
 0,
 0,
-200
+150
 );
 
 
@@ -117,20 +117,24 @@ camera.lookAt(
 
 
 
-// =================
+// ======================
 // РЕНДЕР
-// =================
-
+// ======================
 
 const renderer =
 new THREE.WebGLRenderer({
-antialias:true
+    antialias:true
 });
 
 
 renderer.setSize(
 window.innerWidth,
 window.innerHeight
+);
+
+
+renderer.setPixelRatio(
+window.devicePixelRatio
 );
 
 
@@ -141,25 +145,23 @@ renderer.domElement
 
 
 
-// =================
+// ======================
 // СВЕТ
-// =================
-
+// ======================
 
 scene.add(
 new THREE.HemisphereLight(
-0xffffff,
-0x555555,
-5
+    0xffffff,
+    0x555555,
+    5
 )
 );
 
 
-
 const light =
 new THREE.DirectionalLight(
-0xffffff,
-4
+    0xffffff,
+    4
 );
 
 
@@ -175,11 +177,9 @@ scene.add(light);
 
 
 
-
-// =================
-// PIVOT ДЛЯ ВРАЩЕНИЯ
-// =================
-
+// ======================
+// ГРУППА ДЛЯ ВРАЩЕНИЯ
+// ======================
 
 const pivot =
 new THREE.Group();
@@ -190,14 +190,16 @@ scene.add(pivot);
 
 
 
-
-// =================
-// ЗАГРУЗКА
-// =================
-
+// ======================
+// ЗАГРУЗКА МОДЕЛИ
+// ======================
 
 const loader =
-new THREE.GLTFLoader;
+new GLTFLoader();
+
+
+
+let model;
 
 
 
@@ -209,34 +211,21 @@ loader.load(
 (gltf)=>{
 
 
-const model =
+model =
 gltf.scene;
 
-
-
-// добавляем модель в pivot
 
 pivot.add(model);
 
 
 
-
-// =====================
-// ОРИЕНТАЦИЯ CAD
-// =====================
-
-
-// попробуй сначала так
-
-model.rotation.x =
-Math.PI / 2;
+console.log(
+"Модель загружена"
+);
 
 
 
-// =====================
-// ЦЕНТРИРОВАНИЕ
-// =====================
-
+// размеры
 
 const box =
 new THREE.Box3()
@@ -251,6 +240,30 @@ new THREE.Vector3()
 
 
 
+const size =
+box.getSize(
+new THREE.Vector3()
+);
+
+
+
+console.log(
+"Размер:",
+size
+);
+
+
+
+console.log(
+"Центр:",
+center
+);
+
+
+
+
+// переносим модель в центр
+
 model.position.x -= center.x;
 
 model.position.y -= center.y;
@@ -261,12 +274,7 @@ model.position.z -= center.z;
 
 
 
-const size =
-box.getSize(
-new THREE.Vector3()
-);
-
-
+// масштаб
 
 const maxSize =
 Math.max(
@@ -277,13 +285,14 @@ size.z
 
 
 
-// размер
-
 const scale =
 80 / maxSize;
 
 
-model.scale.setScalar(scale);
+
+model.scale.setScalar(
+scale
+);
 
 
 
@@ -305,25 +314,27 @@ camera.lookAt(
 
 
 
+
 document
 .getElementById("loading")
 .remove();
 
 
-console.log(
-"Готово"
-);
-
 
 },
+
 
 
 undefined,
 
 
+
 (error)=>{
 
-console.error(error);
+console.error(
+"Ошибка:",
+error
+);
 
 }
 
@@ -332,10 +343,9 @@ console.error(error);
 
 
 
-// =================
-// ВРАЩЕНИЕ
-// =================
-
+// ======================
+// АНИМАЦИЯ
+// ======================
 
 function animate(){
 
@@ -346,7 +356,11 @@ animate
 
 
 
+if(pivot){
+
 pivot.rotation.y += 0.01;
+
+}
 
 
 
@@ -364,7 +378,9 @@ animate();
 
 
 
-// resize
+// ======================
+// RESIZE
+// ======================
 
 window.addEventListener(
 "resize",
@@ -372,7 +388,8 @@ window.addEventListener(
 
 
 camera.aspect =
-window.innerWidth/window.innerHeight;
+window.innerWidth /
+window.innerHeight;
 
 
 camera.updateProjectionMatrix();
@@ -385,7 +402,6 @@ window.innerHeight
 
 
 });
-
 
 
 </script>
